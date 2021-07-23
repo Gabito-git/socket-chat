@@ -20,17 +20,20 @@ io.on('connection', (client) => {
         usuarios.agregarPersona( client.id, data.nombre, data.sala );
         // console.log(usuarios.getPersonasPorSala( data.sala ))
         client.broadcast.to(data.sala).emit('listaPersonas', usuarios.getPersonasPorSala( data.sala ));
+        client.broadcast.to(data.sala).emit( 'crearMensaje',  crearMensaje('Administrador', `${ data.nombre } se unió al chat`) );
+
 
         callback( usuarios.getPersonasPorSala( data.sala ) );
 
     })
 
-    client.on('crearMensaje', ({mensaje}) => {
+    client.on('crearMensaje', ({mensaje}, callback) => {
 
         const persona = usuarios.getPersona( client.id );
         const mensajeAEnviar = crearMensaje(persona.nombre, mensaje );
         client.broadcast.to(persona.sala).emit('crearMensaje', mensajeAEnviar);
-
+        
+        callback( mensajeAEnviar );
     })
 
     client.on('disconnect', () => {
